@@ -405,6 +405,7 @@
   duration: none,
   sets: ("A",),
   answer-grid: false,
+  grade-table: none, // none | "parts" | "questions" | "mixed": grader's score table on the cover
   instructions: (),
   answer-space: 5cm, // default space for subjective questions without #answer(...); none = no space
   header: auto, // auto = generated | none = off | content | (info) => content
@@ -422,6 +423,7 @@
     title: if title == "" { id } else { title },
     sets: sets,
     "answer-grid": answer-grid,
+    "grade-table": grade-table,
     instructions: instructions,
     header: header,
     footer: footer,

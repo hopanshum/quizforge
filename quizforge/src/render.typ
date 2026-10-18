@@ -152,6 +152,29 @@
   }
 }
 
+// Grader's score table on the cover, built after shuffling so it matches this set.
+//   "parts":     one column per part
+//   "questions": one column per question
+//   "mixed":     shuffled parts get one column; unshuffled parts one column per question
+#let _grade-table(R, by) = {
+  let cols = ()
+  for (i, s) in R.sections.enumerate() {
+    if by == "questions" or (by == "mixed" and not s.shuffle) {
+      for e in s.questions { cols.push(([Q#e.qno], e.marks)) }
+    } else {
+      cols.push(([Part #numbering("A", i + 1)], s.marks))
+    }
+  }
+  block(width: 100%, above: 1em, align(center, table(
+    columns: cols.len() + 2,
+    inset: (x: 8pt, y: 5pt),
+    align: center + horizon,
+    [], ..cols.map(c => strong(c.at(0))), [*Total*],
+    [*Marks*], ..cols.map(c => [#c.at(1)]), [#R.total],
+    [*Score*], ..cols.map(_ => v(1.4em)), [],
+  )))
+}
+
 #let exam-doc(config, set-id, mode) = {
   assert(mode == "exam" or mode == "key", message: "mode must be 'exam' or 'key', got: " + mode)
   let key = mode == "key"
@@ -254,6 +277,13 @@
         list(spacing: 0.55em, ..instr)
       },
     )
+
+    #{
+      let gt = exam.at("grade-table", default: none)
+      assert(gt in (none, "parts", "questions", "mixed"),
+        message: "grade-table must be none, \"parts\", \"questions\" or \"mixed\"")
+      if gt != none and not key { _grade-table(R, gt) }
+    }
 
     #if show-grid {
       block(above: 1em, {
