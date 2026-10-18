@@ -403,7 +403,8 @@
   title: "",
   date: none,
   duration: none,
-  sets: ("A",),
+  sets: none, // none = one unlabelled paper (set "A" internally)
+  show-set: auto, // auto = show "SET X" only when sets are given; true / false to force
   answer-grid: false,
   grade-table: none, // none | "parts" | "questions" | "mixed": grader's score table on the cover
   instructions: (), // extra bullets; none = no Instructions box at all
@@ -424,7 +425,8 @@
     id: id,
     course: course,
     title: if title == "" { id } else { title },
-    sets: sets,
+    sets: if sets == none { ("A",) } else { sets },
+    "show-set": if show-set == auto { sets != none } else { show-set },
     "answer-grid": answer-grid,
     "grade-table": grade-table,
     "show-marks": show-marks,

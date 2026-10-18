@@ -113,6 +113,7 @@ each set:
 - `show-marks: false`: hide marks next to questions, part titles and on the cover
 - `instructions: none`: no Instructions box
 - `name-line: false`: no Name / Roll No. lines
+- `show-set`: `auto` (default) shows "SET X" only when `sets:` is given; `true`/`false` to force
 
 ## Markers reference
 

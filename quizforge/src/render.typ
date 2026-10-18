@@ -184,6 +184,7 @@
   let mcqs = all-qs.filter(e => e.type == "mcq")
   let show-grid = exam.at("answer-grid", default: false) and mcqs.len() > 0
   let show-marks = exam.at("show-marks", default: true)
+  let show-set = exam.at("show-set", default: true)
 
   let instr = (
     [Write your name and roll number before starting.],
@@ -213,7 +214,7 @@
           " — "
           exam.at("title", default: "")
         }),
-        text(size: 9pt, weight: "bold", "SET " + set-id),
+        if show-set { text(size: 9pt, weight: "bold", "SET " + set-id) },
       )
       v(-4pt)
       line(length: 100%, stroke: 0.4pt + gray)
@@ -224,7 +225,7 @@
     let t = counter(page).final().first()
     align(
       center,
-      text(size: 9pt, fill: gray.darken(30%), "Set " + set-id + "  ·  Page " + str(p) + " of " + str(t)),
+      text(size: 9pt, fill: gray.darken(30%), (if show-set { "Set " + set-id + "  ·  " } else { "" }) + "Page " + str(p) + " of " + str(t)),
     )
   }
   let resolve = (v, default) => {
@@ -234,7 +235,7 @@
   }
 
   [
-    #set document(title: plaintext(exam.at("title", default: exam.id)) + " — Set " + set-id + (if key { " (Answer Key)" } else { "" }))
+    #set document(title: plaintext(exam.at("title", default: exam.id)) + (if show-set { " — Set " + set-id } else { "" }) + (if key { " (Answer Key)" } else { "" }))
     #set page(
       paper: "a4",
       margin: (x: 2cm, top: 2.3cm, bottom: 2.3cm),
@@ -253,7 +254,7 @@
       #v(4pt)
       #text(size: 10.5pt, info.join(h(2.2em)))
       #v(6pt)
-      #box(stroke: 1.2pt, inset: (x: 14pt, y: 7pt), radius: 2pt, text(size: 14pt, weight: "bold", "SET " + set-id))
+      #if show-set { box(stroke: 1.2pt, inset: (x: 14pt, y: 7pt), radius: 2pt, text(size: 14pt, weight: "bold", "SET " + set-id)) }
     ]
 
     #if not key and exam.at("name-line", default: true) {
