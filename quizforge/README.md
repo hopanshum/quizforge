@@ -107,6 +107,13 @@ each set:
 #show: quiz.with(id: "midterm", sets: ("A", "B"), grade-table: "mixed")
 ```
 
+## Cover and display options
+
+- `answers: false`: compile the student paper without command-line flags (like commenting out `\printanswers`); `--input mode=...` still overrides it
+- `show-marks: false`: hide marks next to questions, part titles and on the cover
+- `instructions: none`: no Instructions box
+- `name-line: false`: no Name / Roll No. lines
+
 ## Markers reference
 
 | Marker | Meaning |

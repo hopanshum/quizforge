@@ -406,7 +406,10 @@
   sets: ("A",),
   answer-grid: false,
   grade-table: none, // none | "parts" | "questions" | "mixed": grader's score table on the cover
-  instructions: (),
+  instructions: (), // extra bullets; none = no Instructions box at all
+  answers: true, // false = student paper (like commenting out \printanswers); --input mode=... still overrides
+  show-marks: true, // false = hide all marks (per question, per part, cover)
+  name-line: true, // false = no Name / Roll No. lines
   answer-space: 5cm, // default space for subjective questions without #answer(...); none = no space
   header: auto, // auto = generated | none = off | content | (info) => content
   footer: auto, // ditto; info = (exam, set, mode, total)
@@ -424,6 +427,8 @@
     sets: sets,
     "answer-grid": answer-grid,
     "grade-table": grade-table,
+    "show-marks": show-marks,
+    "name-line": name-line,
     instructions: instructions,
     header: header,
     footer: footer,
@@ -434,6 +439,6 @@
     exam: exam,
     questions: parsed.questions,
     sections: parsed.sections,
-    default-mode: "key", // the master IS the key; --input mode=exam for papers
+    default-mode: if answers { "key" } else { "exam" }, // --input mode=... overrides
   )
 }

@@ -58,7 +58,7 @@
   )
 }
 
-#let _render-question(entry, key) = {
+#let _render-question(entry, key, show-marks: true) = {
   let q = entry.q
   let inner = {
     // Arm the bank-style blank() machinery for this question (and disarm it
@@ -81,7 +81,7 @@
           text(size: 10pt, emph[(Select all that apply.)])
         }
       },
-      marks-tag(q.marks),
+      if show-marks { marks-tag(q.marks) },
     )
     if q.type == "fill_blank" {
       context {
@@ -183,20 +183,23 @@
   let all-qs = R.sections.map(s => s.questions).flatten()
   let mcqs = all-qs.filter(e => e.type == "mcq")
   let show-grid = exam.at("answer-grid", default: false) and mcqs.len() > 0
+  let show-marks = exam.at("show-marks", default: true)
 
   let instr = (
     [Write your name and roll number before starting.],
-    [This paper has #all-qs.len() questions#if R.sections.len() > 1 [ in #R.sections.len() parts], for a total of #R.total marks.],
+    [This paper has #all-qs.len() questions#if R.sections.len() > 1 [ in #R.sections.len() parts], #if show-marks [, for a total of #R.total marks].],
   )
   if show-grid and not key {
     instr.push([Record your final MCQ answers in the answer grid below — the grid is what gets graded.])
   }
-  for s in exam.at("instructions", default: ()) { instr.push(s) }
+  let extra = exam.at("instructions", default: ())
+  let show-instr = extra != none
+  if show-instr { for s in extra { instr.push(s) } }
 
   let info = ()
   if "date" in exam { info.push([Date: #exam.date]) }
   if "duration" in exam { info.push([Duration: #exam.duration]) }
-  info.push([Maximum marks: #R.total])
+  if show-marks { info.push([Maximum marks: #R.total]) }
 
   // Default page furniture; both are overridable via exam.header / exam.footer
   // (auto = these defaults, none = off, content = fixed, function = called
@@ -253,7 +256,7 @@
       #box(stroke: 1.2pt, inset: (x: 14pt, y: 7pt), radius: 2pt, text(size: 14pt, weight: "bold", "SET " + set-id))
     ]
 
-    #if not key {
+    #if not key and exam.at("name-line", default: true) {
       v(8pt)
       grid(
         columns: (auto, 1fr, auto, 0.45fr),
@@ -264,7 +267,7 @@
       )
     }
 
-    #block(
+    #if show-instr { block(
       width: 100%,
       stroke: 0.6pt + gray.darken(20%),
       inset: 9pt,
@@ -276,7 +279,7 @@
         set text(size: 10pt)
         list(spacing: 0.55em, ..instr)
       },
-    )
+    ) }
 
     #{
       let gt = exam.at("grade-table", default: none)
@@ -298,7 +301,7 @@
           grid(
             columns: (1fr, auto),
             text(size: 12.5pt, weight: "bold")[Part #numbering("A", si + 1) — #s.title],
-            text(size: 10pt, style: "italic", fill: gray.darken(40%))[#s.marks marks],
+            if show-marks { text(size: 10pt, style: "italic", fill: gray.darken(40%))[#s.marks marks] },
           )
           if s.instructions != none {
             v(2pt)
@@ -311,7 +314,7 @@
         block(above: 1.2em, below: 0.4em, text(size: 10pt, style: "italic", s.instructions))
       }
       for e in s.questions {
-        block(above: 1.1em, _render-question(e, key))
+        block(above: 1.1em, _render-question(e, key, show-marks: show-marks))
       }
     }
 
