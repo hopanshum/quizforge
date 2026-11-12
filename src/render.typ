@@ -287,22 +287,51 @@
 //   "questions": one column per question
 //   "mixed":     shuffled parts get one column; unshuffled parts one column per question
 #let _grade-table(R, by) = {
+  // A part made only of MCQs is labelled "MC" when it is the only such part;
+  // otherwise parts keep their letters (Part A, Part B, ...).
+  let all-mc = R.sections.map(s => s.questions.all(e => e.type == "mcq"))
+  let mc-label = all-mc.filter(x => x).len() == 1
   let cols = ()
   for (i, s) in R.sections.enumerate() {
     if by == "questions" or (by == "mixed" and not s.shuffle) {
       for e in s.questions { cols.push(([Q#e.qno], e.marks)) }
     } else {
-      cols.push(([Part #numbering("A", i + 1)], s.marks))
+      cols.push((if mc-label and all-mc.at(i) [MC] else [Part #numbering("A", i + 1)], s.marks))
     }
   }
-  block(width: 100%, above: 1em, align(center, table(
-    columns: cols.len() + 2,
-    inset: (x: 8pt, y: 5pt),
-    align: center + horizon,
-    [], ..cols.map(c => strong(c.at(0))), [*Total*],
-    [*Marks*], ..cols.map(c => [#c.at(1)]), [#R.total],
-    [*Score*], ..cols.map(_ => v(1.4em)), [],
-  )))
+  cols.push(([Total], R.total))
+  let n = cols.len()
+  let last = n - 1
+  let head-fill = luma(238)
+  let line-c = luma(150)
+  // score cell: room to write, with the maximum in the bottom-right corner
+  let score-cell(m, bold: false) = box(width: 100%, height: 3.4em, {
+    place(bottom + right, dx: -1pt, dy: -1pt,
+      text(size: 8.5pt, fill: luma(110), weight: if bold { "bold" } else { "regular" }, "/ " + str(m)))
+  })
+  block(width: 100%, above: 1.2em, align(center, context {
+    text(size: 8.5pt, fill: luma(110), tracking: 0.04em, smallcaps[For grader use only])
+    v(0.3em)
+    table(
+      // equal-width columns (wide enough for the longest label); Total a bit wider
+      columns: {
+        let lab = c => text(size: 10.5pt, weight: "bold", c.at(0))
+        let w = calc.max(4.4em.to-absolute(), ..cols.map(c => measure(lab(c)).width + 16pt))
+        (w,) * last + (w + 0.8em.to-absolute(),)
+      },
+      inset: (x: 6pt, y: 4pt),
+      align: center + horizon,
+      stroke: (x, y) => (
+        left: if x > 0 { 0.4pt + line-c } else { 0.8pt + luma(60) },
+        right: if x == last { 0.8pt + luma(60) } else { none },
+        top: if y == 0 { 0.8pt + luma(60) } else { 0.4pt + line-c },
+        bottom: if y == 1 { 0.8pt + luma(60) } else { none },
+      ),
+      fill: (x, y) => if y == 0 { if x == last { luma(215) } else { head-fill } } else if x == last { luma(248) },
+      ..cols.map(c => text(size: 10.5pt, weight: "bold", c.at(0))),
+      ..cols.enumerate().map(((j, c)) => score-cell(c.at(1), bold: j == last)),
+    )
+  }))
 }
 
 #let exam-doc(config, set-id, mode) = {
