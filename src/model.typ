@@ -207,12 +207,13 @@
 }
 
 // Per-question overrides: #opts(shuffle: false, columns: 2, multiple: true)
-#let opts(shuffle: auto, columns: auto, multiple: auto, compact: auto) = {
+#let opts(shuffle: auto, columns: auto, multiple: auto, compact: auto, new-page: auto) = {
   let v = (:)
   if shuffle != auto { v.insert("shuffle", shuffle) }
   if columns != auto { v.insert("columns", columns) }
   if multiple != auto { v.insert("multiple", multiple) }
   if compact != auto { v.insert("compact", compact) }
+  if new-page != auto { v.insert("new-page", new-page) } // this question starts on a new page
   metadata((qf: "opts", v: v))
 }
 
@@ -231,7 +232,8 @@
 }
 
 // Section options, placed in or right after a heading: = Part C #section(shuffle: false)
-#let section(shuffle: true) = metadata((qf: "sec", v: (shuffle: shuffle)))
+// new-page: true = every question in this part after the first starts on a new page
+#let section(shuffle: true, new-page: false) = metadata((qf: "sec", v: (shuffle: shuffle, "new-page": new-page)))
 
 // Place the MCQ answer sheet here: at the very top of the body (right after the
 // cover), between two parts, or at the end. Numbers and the key follow each set's

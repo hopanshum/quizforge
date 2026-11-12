@@ -167,6 +167,13 @@
       sub-items.push(c)
     } else if sub-items.len() > 0 {
       assert(
+        not _collect-markers(c, ()).any(mk => mk.qf == "answer"),
+        message: where + ": #answer(...) after the subquestions is at the question's indentation, so it "
+          + "would print once after all parts. To put it right after a subquestion, indent it under that "
+          + "subquestion's text (4 spaces). For one shared answer box after all parts, put #answer(...) "
+          + "in the stem, before the first '+' subquestion.",
+      )
+      assert(
         _is-blankish(c) or _marker(c) != none,
         message: where + ": text after the subquestions is not supported — put it in the question "
           + "stem (above the first '+' subquestion) or inside the last subquestion",
@@ -288,7 +295,7 @@
     id = "q" + str(fnv1a(plaintext(body)))
   }
 
-  if option-items.len() > 0 {
+  let q = if option-items.len() > 0 {
     assert(blanks.len() == 0, message: where + ": a question cannot have both options and #blank[...]")
     assert(
       ans-mk == none,
@@ -348,13 +355,15 @@
       parts: parts,
     )
   }
+  q.insert("new-page", over.at("new-page", default: false))
+  q
 }
 
 // Split the document body into sections of questions.
 // Returns (questions: (..), sections: (..)) ready for make-exam.
 #let _parse(body, default-space) = {
   let sections = ()
-  let cur = (title: none, shuffle: true, pre: (), items: ())
+  let cur = (title: none, shuffle: true, "new-page": false, pre: (), items: ())
 
   let flush(cur, sections) = {
     if cur.items.len() == 0 {
@@ -388,6 +397,7 @@
         }
       } else if mk.qf == "sec" {
         cur.shuffle = mk.v.at("shuffle", default: true)
+        cur.insert("new-page", mk.v.at("new-page", default: false))
       } else {
         // A #m(2) drifting between questions would silently change nothing
         // (the question would keep its default marks) — refuse loudly.
@@ -417,9 +427,12 @@
       for hm in _collect-markers(c.body, ()) {
         if hm.qf == "sec" { title = c.body } // markers are invisible; keep body as-is
       }
-      cur = (title: title, shuffle: true, pre: (), items: ())
+      cur = (title: title, shuffle: true, "new-page": false, pre: (), items: ())
       for hm in _collect-markers(c.body, ()) {
-        if hm.qf == "sec" { cur.shuffle = hm.v.at("shuffle", default: true) }
+        if hm.qf == "sec" {
+          cur.shuffle = hm.v.at("shuffle", default: true)
+          cur.insert("new-page", hm.v.at("new-page", default: false))
+        }
       }
     } else if c.func() == enum.item {
       assert(
@@ -474,6 +487,7 @@
       instructions: if sec.pre.len() > 0 { sec.pre.join() } else { none },
       use: ids,
       shuffle: sec.shuffle,
+      "new-page": sec.at("new-page", default: false),
     ))
   }
   (questions: questions, sections: out-sections, sheets: sheets)

@@ -334,7 +334,7 @@
   let instr = ()
   if exam.at("name-line", default: true) { instr.push([Write your name and student ID before starting.]) }
   instr += (
-    [This paper has #all-qs.len() questions#if R.sections.len() > 1 [ in #R.sections.len() parts]#if show-marks [, for a total of #R.total marks].],
+    [This paper has #all-qs.len() #if all-qs.len() == 1 [question] else [questions]#if R.sections.len() > 1 [ in #R.sections.len() parts]#if show-marks [, for a total of #R.total marks].],
   )
   if show-grid and not key {
     instr.push([Record your final MCQ answers in the answer grid below — the grid is what gets graded.])
@@ -468,7 +468,10 @@
       } else if s.instructions != none {
         block(above: 1.2em, below: 0.4em, text(size: 10pt, style: "italic", s.instructions))
       }
-      for e in s.questions {
+      for (qi, e) in s.questions.enumerate() {
+        if e.q.at("new-page", default: false) or (s.at("new-page", default: false) and qi > 0) {
+          pagebreak(weak: true)
+        }
         block(above: 1.1em, _render-question(e, key, show-marks: show-marks))
       }
     }

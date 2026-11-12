@@ -254,7 +254,13 @@ carry its own `#m(...)`, `#answer(...)` and `#blank[...]`. Give every part a
 `#m` (the question's marks become their sum) or none of them (use `#m` on the
 question). If any part has `#answer`, the answer space goes under the parts and
 no default space is added at the end. Parts keep their order; MCQs cannot have
-parts. The stem can be as long as you like (several paragraphs, figures,
+parts.
+
+Indentation decides where an `#answer` goes: indented under a subquestion's
+text (4 spaces) it prints right after that subquestion; in the stem (2 spaces,
+before the first `+` subquestion) it prints once after all parts. A
+question-level `#answer` written *after* the subquestions is refused, because
+it is almost always a mis-indented per-part answer. The stem can be as long as you like (several paragraphs, figures,
 tables), indented under the `+`.
 
 ```typst
@@ -273,3 +279,11 @@ tables), indented under the `+`.
 `#pagebreak()` (with any of its arguments, e.g. `#pagebreak(to: "odd")`) can be
 written in the body at the start, between two parts, or at the end. Like
 `#answer-sheet()`, it cannot go between two questions of a part.
+
+## Local fork 0.1.1: a new page for each question
+
+- `#opts(new-page: true)` in a question: that question starts on a new page
+  (wherever the shuffle puts it).
+- `= Long Questions #section(new-page: true)`: every question of the part after
+  the first starts on a new page (the first stays under the part heading; put a
+  `#pagebreak()` before the heading if the part itself should start on a new page).

@@ -134,6 +134,7 @@
       instructions: sec.at("instructions", default: none),
       marks: sec-marks,
       shuffle: sec.at("shuffle", default: true),
+      "new-page": sec.at("new-page", default: false),
       questions: qs,
     ))
   }
