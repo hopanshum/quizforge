@@ -58,6 +58,22 @@
   )
 }
 
+// Keep `body` on one page: if it does not fit in the space left, it moves to the
+// next page whole. Content taller than a full page is left breakable (an
+// unbreakable over-tall block would run off the page and be cut in print).
+// context content is transparent to pagination (unlike layout(), whose
+// implicit container would clip); page geometry matches exam-doc's set rule.
+#let _keep(body) = context {
+  let avail-w = page.width - 4cm
+  let avail-h = page.height - 4.6cm
+  let h = measure(block(width: avail-w, body)).height
+  if h > avail-h { body } else { block(breakable: false, body) }
+}
+
+// Empty writing space of a fixed height. Unlike v(), it is never cut short at
+// the bottom of a page (spacing is discarded at page breaks; a block is not).
+#let _space(h) = block(width: 100%, height: h, breakable: false, above: 0pt, below: 0pt)
+
 #let _render-question(entry, key, show-marks: true) = {
   let q = entry.q
   let inner = {
@@ -70,7 +86,9 @@
       blank-counter.update(0)
       q-state.update(none)
     }
-    grid(
+    // with subquestions, the stem travels with part (a) instead of being
+    // stranded at the bottom of a page
+    block(sticky: q.at("parts", default: ()).len() > 0, grid(
       columns: (2.4em, 1fr, auto),
       column-gutter: 0.6em,
       strong("Q" + str(entry.qno) + "."),
@@ -82,10 +100,10 @@
         }
       },
       if show-marks { marks-tag(q.marks) },
-    )
+    ))
     let parts = q.at("parts", default: ())
     let part-marks = parts.len() > 0 and parts.all(p => p.marks != none)
-    for (pi, p) in parts.enumerate() {
+    for (pi, p) in parts.enumerate() { _keep({
       block(inset: (left: 2.4em), above: 0.8em, grid(
         columns: (2em, 1fr, auto),
         column-gutter: 0.6em,
@@ -102,10 +120,10 @@
             block(inset: (left: 4.4em), above: 0.7em, key-note("Rubric", p.rubric, luma(246), luma(120)))
           }
         } else if p.space != none {
-          v(p.space)
+          _space(p.space)
         }
       }
-    }
+    }) }
     if q.type == "fill_blank" {
       context {
         let n = blank-counter.get().first()
@@ -130,26 +148,13 @@
           block(inset: (left: 2.4em), above: 0.8em, key-note("Rubric", q.rubric, luma(246), luma(120)))
         }
       } else if q.answer-space != none {
-        v(q.answer-space)
+        _space(q.answer-space)
       }
     }
   }
-  // Subjective questions may break across pages (large answer space). MCQ and
-  // fill-in-the-blank questions stay whole — unless taller than a full page,
-  // in which case they must break: an unbreakable over-tall block would
-  // silently overflow past the page edge and truncate in print.
-  if q.type == "subjective" {
-    inner
-  } else {
-    // context content is transparent to pagination (unlike layout(), whose
-    // implicit container would clip); page geometry matches exam-doc's set rule
-    context {
-      let avail-w = page.width - 4cm
-      let avail-h = page.height - 4.6cm
-      let h = measure(block(width: avail-w, inner)).height
-      if h > avail-h { inner } else { block(breakable: false, inner) }
-    }
-  }
+  // A question with subquestions may break between parts (each part, with its
+  // answer space, is kept whole above); anything else is kept whole.
+  if q.at("parts", default: ()).len() > 0 { inner } else { _keep(inner) }
 }
 
 #let _answer-grid(mcqs, key) = {
