@@ -87,6 +87,45 @@
   out
 }
 
+// Labels: `<name>` after a question's or subquestion's text makes it
+// referable with `@name`. Typst attaches a label to the element just before it
+// (usually a text node, which cannot be referenced), so the parser takes the
+// label off that element and the renderer re-attaches it to a hidden anchor.
+// Elements Typst can already reference keep their labels.
+#let _NATIVE-REF = (math.equation, figure, heading, footnote)
+
+#let _unlabel(c, where) = {
+  let f = c.func()
+  if f == text { return text(c.text) }
+  if f == metadata { return metadata(c.value) }
+  if f == strong or f == emph { return f(c.body) }
+  if f == smartquote { return smartquote(double: c.at("double", default: true)) }
+  assert(
+    false,
+    message: where + ": the label " + repr(c.label) + " is attached to " + repr(f)
+      + " — put a question's or subquestion's <label> right after its text",
+  )
+}
+
+// (label or none, children with that label removed)
+#let _take-label(children, where) = {
+  let lab = none
+  let out = ()
+  for c in children {
+    if type(c) == content and c.has("label") and c.func() not in _NATIVE-REF {
+      assert(
+        lab == none,
+        message: where + ": more than one <label> (" + repr(lab) + " and " + repr(c.label) + ")",
+      )
+      lab = c.label
+      out.push(_unlabel(c, where))
+    } else {
+      out.push(c)
+    }
+  }
+  (lab, out)
+}
+
 // Detect and strip a leading ✓/✔ from an option body. Returns (found, body).
 #let _strip-check(body) = {
   if body.has("text") {
@@ -188,7 +227,11 @@
   let parts = ()
   for (pi, si) in sub-items.enumerate() {
     let pwhere = where + ", part (" + "abcdefghijklmnopqrstuvwxyz".at(pi) + ")"
-    let p = (body: si.body, marks: none, space: auto, model: none, rubric: none, blanks: ())
+    let (plab, pch) = _take-label(_children(si.body), pwhere)
+    let p = (
+      body: if plab == none { si.body } else { pch.join() },
+      marks: none, space: auto, model: none, rubric: none, blanks: (), label: plab,
+    )
     for mk in _collect-markers(si.body, ()) {
       if mk.qf == "marks" {
         assert(p.marks == none, message: pwhere + ": #m(...) appears more than once")
@@ -210,6 +253,7 @@
     }
     parts.push(p)
   }
+  let (qlab, body-parts) = _take-label(body-parts, where)
   while body-parts.len() > 0 and _is-blankish(body-parts.last()) {
     let _ = body-parts.pop() // discard: pop's return value must not join the result
   }
@@ -356,6 +400,7 @@
     )
   }
   q.insert("new-page", over.at("new-page", default: false))
+  q.insert("label", qlab)
   q
 }
 

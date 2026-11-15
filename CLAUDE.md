@@ -46,7 +46,9 @@ from explicit strings (SPEC §2 table).
   of invisibles: "counter-update", "state-update", "context", "metadata".
 - Editing demo exams changes realized orders → update exact assertions in
   tests/test_build.py / test_markup.py.
-- `@word` in question text is Typst reference syntax — quote or escape it.
+- `@word` in question text is Typst reference syntax — quote or escape it
+  (unless it refers to a question/subquestion `<label>`: parse.typ moves such
+  labels onto hidden figure anchors that render.typ prints as Q3 / (c) / Q3(c)).
 - Marker collection must walk ALL content fields via `.fields()` — `attach`
   (math scripts), `frac`, figure captions etc. don't use body/children. A
   blank inside `$x^(#blank[..])$` broke the old body/children-only walker.

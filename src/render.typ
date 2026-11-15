@@ -1,7 +1,7 @@
 // Rendering: exam and answer-key modes, cover page, answer grid, and the
 // make-exam() entry point shared by both authoring front-ends.
 
-#import "base.typ": LETTERS, key-color, mode-state, q-state, blank-counter, plaintext
+#import "base.typ": LETTERS, key-color, mode-state, q-state, blank-counter, cur-q-state, plaintext
 #import "realize.typ": realize, meta-of
 
 #let marks-tag(m) = text(
@@ -74,6 +74,24 @@
 // the bottom of a page (spacing is discarded at page breaks; a block is not).
 #let _space(h) = block(width: 100%, height: h, breakable: false, above: 0pt, below: 0pt)
 
+// Hidden, referable anchor for a labelled question ("qf-question") or
+// subquestion ("qf-part"); the show rules in exam-doc hide it and print
+// references to it as "Q3", "(c)" or "Q3(c)".
+#let _anchor(kind, lab, qno, part) = if lab != none {
+  [#figure(kind: kind, supplement: none, numbering: "1", outlined: false, metadata((qno: qno, part: part)))#lab]
+}
+
+#let _ref-text(it) = {
+  let el = it.element
+  if el == none or el.func() != figure or el.kind not in ("qf-question", "qf-part") { return it }
+  let d = el.body.value
+  let here = cur-q-state.get()
+  let t = if d.part == none { "Q" + str(d.qno) }
+    else if here == d.qno { "(" + d.part + ")" }
+    else { "Q" + str(d.qno) + "(" + d.part + ")" }
+  link(el.location(), t)
+}
+
 #let _render-question(entry, key, show-marks: true) = {
   let q = entry.q
   let inner = {
@@ -86,6 +104,7 @@
       blank-counter.update(0)
       q-state.update(none)
     }
+    cur-q-state.update(entry.qno)
     // with subquestions, the stem travels with part (a) instead of being
     // stranded at the bottom of a page
     block(sticky: q.at("parts", default: ()).len() > 0, grid(
@@ -93,6 +112,7 @@
       column-gutter: 0.6em,
       strong("Q" + str(entry.qno) + "."),
       {
+        _anchor("qf-question", q.at("label", default: none), entry.qno, none)
         q.body
         if q.type == "mcq" and q.multiple {
           h(0.35em)
@@ -108,7 +128,10 @@
         columns: (2em, 1fr, auto),
         column-gutter: 0.6em,
         "(" + "abcdefghijklmnopqrstuvwxyz".at(pi) + ")",
-        p.body,
+        {
+          _anchor("qf-part", p.at("label", default: none), entry.qno, "abcdefghijklmnopqrstuvwxyz".at(pi))
+          p.body
+        },
         if show-marks and part-marks { marks-tag(p.marks) },
       ))
       if q.type == "subjective" and p.space != auto {
@@ -427,6 +450,9 @@
     )
     #set text(font: "New Computer Modern", size: 11pt)
     #set par(justify: true)
+    #show figure.where(kind: "qf-question"): none
+    #show figure.where(kind: "qf-part"): none
+    #show ref: it => context _ref-text(it)
     #mode-state.update(mode)
     #metadata(meta-of(R)) <answerkey>
 

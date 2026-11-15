@@ -38,6 +38,9 @@ CASES = [
     ("markup-identical-questions.typ", "are identical (same text or same #qid)", []),
     ("markup-empty-part.typ", "part 'Empty Part' has no questions", []),
     ("markup-sec-in-body.typ", "belongs in a part heading", []),
+    # local fork: labels
+    ("markup-two-labels.typ", "more than one <label> (<one> and <two>)", []),
+    ("markup-label-on-table.typ", "the label <tbl> is attached to table", []),
     ("markup-explain-on-subjective.typ", "only supported on MCQs", []),
     ("too-many-options.typ", "at most 26 options", []),
     ("markup-set-in-body.typ", "move them above the '#show: quiz' line", []),

@@ -8,6 +8,9 @@
 // Armed per fill-in-the-blank question in bank/constructor mode.
 #let q-state = state("quizforge-question", none)
 #let blank-counter = counter("quizforge-blank")
+// Number of the question being rendered (set at each question); lets a
+// reference print "(c)" inside its own question and "Q3(c)" elsewhere.
+#let cur-q-state = state("quizforge-current-question", none)
 
 // Element kinds that carry no prose — skipped during text extraction so that
 // markers, state updates, and context nodes never leak into hashes or CSVs.

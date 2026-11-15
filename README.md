@@ -274,6 +274,33 @@ tables), indented under the `+`.
     #answer(4cm, rubric: [+1 formula; +2 number.])[$1250$.]
 ```
 
+## Local fork 0.1.1: referring to questions and subquestions
+
+Put a `<label>` after a question's or subquestion's text and refer to it with
+`@label`, as in ordinary Typst. References follow each set's shuffle: inside
+the same question a subquestion prints as "(c)"; anywhere else it prints as
+"Q3(c)", and a labelled question prints as "Q3". References work in question
+text, model answers and rubrics, and are links in the PDF.
+
+```typst
++ Demand is $Q = 100 - P$. <demand>
+
+  + #m(2) Find the equilibrium price. <price>
+    #answer(3cm)[$P^* = 50$.]
+  + #m(3) Using @price, compute consumer surplus.
+    #answer(4cm)[$1250$.]
++ #m(2) Using your answers to @price and @demand, ...
+```
+
+- The label must come right after the text (Typst attaches a label to the
+  element just before it). A label after a table, image, etc. is refused with
+  a message; one question or subquestion can have only one label.
+- Labels on equations, figures and headings are left alone and keep their
+  usual Typst meaning (a referenced equation still needs `math.equation`
+  numbering).
+- Labels do not change question ids, so adding one never reshuffles anything.
+- A misspelt `@name` fails with Typst's own "label does not exist" error.
+
 ## Local fork 0.1.1: page breaks between parts
 
 `#pagebreak()` (with any of its arguments, e.g. `#pagebreak(to: "odd")`) can be
