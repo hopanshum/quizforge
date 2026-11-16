@@ -41,6 +41,9 @@ CASES = [
     # local fork: labels
     ("markup-two-labels.typ", "more than one <label> (<one> and <two>)", []),
     ("markup-label-on-table.typ", "the label <tbl> is attached to table", []),
+    # local fork: #insert[...]
+    ("markup-insert-between.typ", "#insert[...] or #pagebreak() sits between questions of a part", []),
+    ("markup-insert-in-question.typ", "#insert[...] goes between parts", []),
     ("markup-explain-on-subjective.typ", "only supported on MCQs", []),
     ("too-many-options.typ", "at most 26 options", []),
     ("markup-set-in-body.typ", "move them above the '#show: quiz' line", []),

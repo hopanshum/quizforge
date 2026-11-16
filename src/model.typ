@@ -249,3 +249,9 @@
   assert(style in ("boxes", "write"), message: "answer-sheet(): style must be \"boxes\" or \"write\"")
   metadata((qf: "sheet", v: (style: style, columns: columns, choices: choices, page: page, title: title, parts: parts, group: group)))
 }
+
+// Free content placed between parts or after the last part (e.g. a formula
+// sheet, a translation, an appendix). It does not move with shuffled
+// questions, so it cannot go between two questions of a part. Printed in both
+// exam and key mode; start it with #pagebreak() for its own page.
+#let insert(body) = metadata((qf: "sheet", v: (raw: body)))

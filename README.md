@@ -274,6 +274,28 @@ tables), indented under the `+`.
     #answer(4cm, rubric: [+1 formula; +2 number.])[$1250$.]
 ```
 
+## Local fork 0.1.1: free content between parts — `#insert[...]`
+
+Quizforge refuses loose text between questions (it could not move with the
+shuffle). For content that belongs *between parts* or *after the last part* —
+a formula sheet, a translation, an appendix — wrap it in `#insert[...]`:
+
+```typst
+= Long Questions
++ ...
++ ...
+
+#insert[
+  #pagebreak()
+  = Chinese translation   // headings inside insert are ordinary headings
+  ...
+]
+```
+
+It is printed in both exam and key mode, after "— End of paper —" when it
+comes last. It is not a question and does not count towards marks. Inside a
+question, or between two questions of a part, it fails with a message.
+
 ## Local fork 0.1.1: referring to questions and subquestions
 
 Put a `<label>` after a question's or subquestion's text and refer to it with

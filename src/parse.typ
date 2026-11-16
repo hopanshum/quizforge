@@ -312,7 +312,8 @@
       assert(false, message: where + ": #section(...) belongs in a part heading, not in a question")
     }
     else if mk.qf == "sheet" {
-      assert(false, message: where + ": #answer-sheet(...) goes between parts (or at the start/end of the paper), not inside a question")
+      assert(false, message: where + ": " + (if "raw" in mk.v { "#insert[...]" } else { "#answer-sheet(...)" })
+        + " goes between parts (or at the start/end of the paper), not inside a question")
     }
   }
   if parts.len() > 0 {
@@ -482,7 +483,7 @@
     } else if c.func() == enum.item {
       assert(
         not pending,
-        message: "quizforge: #answer-sheet(...) or #pagebreak() sits between questions of a part — questions there are shuffled, "
+        message: "quizforge: #answer-sheet(...), #insert[...] or #pagebreak() sits between questions of a part — questions there are shuffled, "
           + "so place it before the part heading, after the part's last question, or at the start/end of the paper",
       )
       cur.items.push(c)

@@ -23,7 +23,7 @@
 
 // Inline markers (markup mode) — all render as nothing and configure the
 // question they appear in.
-#import "src/model.typ": blank, m, yes, pin, pin-first, qid, opts, explain, answer, section, answer-sheet
+#import "src/model.typ": blank, m, yes, pin, pin-first, qid, opts, explain, answer, section, answer-sheet, insert
 
 // Power-user access to the deterministic PRNG and text extraction.
 #import "src/rng.typ" as rng
